@@ -1,0 +1,79 @@
+#include <Stepper.h>      // incluye libreria stepper
+#define bot 1
+#define POT 0
+#define POT1 1
+#define POT2 2 
+#define PULS 12
+#define TRIG 13
+#define ECO 6
+
+int DURACION;
+int DISTANCIA;
+int VALORPOT1;      // variable para almacenar valor leido en entrada A0
+int DELA1;     // valor de delay en sumergimiento
+int DELA1S;
+int VALORPOT;      // variable para almacenar valor leido en entrada A0
+int DELA2;     // valor de delay en secado
+int DELA2S;
+int VALORPOT2;
+int CICLOS;
+int VANT;
+
+Stepper motor1(2048, 8, 10, 9, 11);   // pasos completos
+ 
+void setup() {
+  pinMode(PULS, INPUT); 
+  motor1.setSpeed(1);       // en RPM (valores de 1, 2 o 3 para 28BYJ-48)
+  Serial.begin(9600);      // inicializacion de comunicacion serial a 9600 bps
+}
+
+ 
+void loop() {
+  while(digitalRead(PULS) == LOW){
+     digitalWrite(TRIG, HIGH);     // generacion del pulso a enviar
+  delay(1);       // al pin conectado al trigger
+  digitalWrite(TRIG, LOW);    // del sensor 
+    DURACION = pulseIn(ECO, HIGH);  // con funcion pulseIn se espera un pulso
+            // alto en Echo
+    VALORPOT = analogRead(POT);      // lee valor de entrada A0
+    DELA1 = map(VALORPOT, 0, 1023, 1000, 30000);
+    VALORPOT1 = analogRead(POT1);      // lee valor de entrada A1
+    DELA2 = map(VALORPOT1, 0, 1023, 1000, 30000);
+    VALORPOT2 = analogRead(POT2);
+    CICLOS = map(VALORPOT2, 0, 1023, 1, 30);
+    VANT = CICLOS; 
+    DELA1S = DELA1/1000;
+    DELA2S = DELA2/1000;
+    Serial.println("Delay arriba");// Deberia introducir alg{un delay porque la actualización es demasiado rápida
+    Serial.println(DELA1S);
+    Serial.println("Delay abajo");
+    Serial.println(DELA2S);
+    Serial.println("Numero de ciclos");
+    Serial.println(CICLOS);
+    DISTANCIA = DURACION / 58.2;    // distancia medida en centimetros
+    Serial.println("Distancia");
+    Serial.println(DISTANCIA);    // envio de valor de distancia por monitor serial
+    delay(5000);
+     
+
+    delay(200);       // demora entre datos
+  
+
+
+ }
+
+    for(int i = 0; i <= CICLOS; i++) {
+      //Serial.println(TRAMP);
+      motor1.step(2048);         // cantidad de pasos
+      delay(1000);     // demora de la cantidad de tiempo para coatear
+      motor1.step(-2048);        // signo menos indica giro en sentido opuesto
+      delay(1000);    // demora de la cantidad de tiempo para secar
+}
+
+
+
+while(digitalRead(PULS) == HIGH){   // espera como funcion antirebote simple
+ }
+  
+  }
+ 
